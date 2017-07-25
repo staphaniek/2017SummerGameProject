@@ -4,6 +4,7 @@
 #include "cocos2d.h"
 #include "Ball.h"
 
+const int BGTAG = 100;
 
 class StartScene : public cocos2d::Layer
 {

@@ -1,4 +1,7 @@
-#include "cocos2d.h";
+#include "cocos2d.h"
+
+const int BALLTAG = 1;
+const int BALLSIZE = 30;
 
 class Ball : public cocos2d::Sprite
 {
