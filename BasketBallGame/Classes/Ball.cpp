@@ -26,6 +26,7 @@ Ball* Ball::spriteWithFile(const char* fileName)
 
 void Ball::initSetting()
 {
+	_removed = false;
 	_score = 0;
 	_speed = 600;
 	_angle = 0;

@@ -6,6 +6,7 @@ const int BALLSIZE = 30;
 class Ball : public cocos2d::Sprite
 {
 public:
+	bool _removed;
 	int _score;
 	float _speed;
 	float _angle;

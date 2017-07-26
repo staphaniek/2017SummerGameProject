@@ -3,6 +3,7 @@
 
 #include "cocos2d.h"
 #include "Ball.h"
+#include "Ring.h"
 
 const int BGTAG = 100;
 
@@ -12,18 +13,16 @@ public:
     static cocos2d::Scene* createScene();
 
 	Ball* _ball;
-	void initBall();
-	Ball* createBall(cocos2d::Vec2 &pos);
-	void attachBallbody(Ball* ball);
+	Ball* initBall(cocos2d::Vec2 &pos);
+	void createBall();
 
-	cocos2d::Vec2 ring1UpSpeed = cocos2d::Vec2(0,25);
-	cocos2d::Vec2 ring1DownSpeed = cocos2d::Vec2(0, -25);
-	cocos2d::Vec2 ring2UpSpeed = cocos2d::Vec2(0, 30);
-	cocos2d::Vec2 ring2DownSpeed = cocos2d::Vec2(0, -30);
-	cocos2d::Vec2 ring3UpSpeed = cocos2d::Vec2(0, 35);
-	cocos2d::Vec2 ring3DownSpeed = cocos2d::Vec2(0, -35);
-	cocos2d::Vec2 ring4UpSpeed = cocos2d::Vec2(0, 40);
-	cocos2d::Vec2 ring4DownSpeed = cocos2d::Vec2(0, -40);
+	Ring* ring[4];
+	Ring* createRing(int score, int index, cocos2d::Color3B color, const char* melody);
+
+	float ringSpeed[4] = { 25,30,35,40 };
+
+	int _score;
+	int _life;
 
     virtual bool init();
     
@@ -37,14 +36,16 @@ public:
 
 	void onClickThrow(Ref* object);
 
+	void attachGoal(Ring* ring,int index, const char* mode);
+
 	void createBG();
 	void createScore();
+	void updateScore();
+	bool isScoreChanged;
 
 	void update(float fDelta);
 
 	bool keyCheck[128];
-	int _score;
-	int _life;
 
 	void initSetting();
 
@@ -52,8 +53,8 @@ public:
 	bool isRight;
 	bool isDown;
 	bool isUp;
-	bool isJump;
 	bool isThrow;
+	bool isBall;
 
 private:
 	cocos2d::PhysicsWorld *sceneWorld;
