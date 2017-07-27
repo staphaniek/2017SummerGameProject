@@ -11,7 +11,7 @@ USING_NS_CC;
 Scene* StartScene::createScene()
 {
 	auto scene = Scene::createWithPhysics();
-//	scene->getPhysicsWorld()->setDebugDrawMask(PhysicsWorld::DEBUGDRAW_ALL);
+	scene->getPhysicsWorld()->setDebugDrawMask(PhysicsWorld::DEBUGDRAW_ALL);
 
 	scene->getPhysicsWorld()->setGravity(Vec2(0, -98 * 3));
 
@@ -494,7 +494,7 @@ void StartScene::createBall()
 
 Ball* StartScene::initBall(Vec2 &pos)
 {
-	Ball* ball = Ball::spriteWithFile("ball.png");
+	Ball* ball = Ball::spriteWithFile("ball1.jpg");
 
 	ball->setTag(BALLTAG);
 

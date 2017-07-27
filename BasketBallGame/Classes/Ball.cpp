@@ -53,8 +53,8 @@ void Ball::initArrow()
 	_arrow = Sprite::create("arrow.png");
 	_arrow->setAnchorPoint(Point(0, 0.5f));
 
-	_arrow->setScaleX(5);
-	_arrow->setScaleY(2);
+	_arrow->setScaleX(3);
+//	_arrow->setScaleY(1);
 
 	this->addChild(_arrow);
 
