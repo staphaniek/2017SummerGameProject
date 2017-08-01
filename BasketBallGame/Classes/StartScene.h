@@ -9,6 +9,8 @@ const int BGTAG = 100;
 
 class StartScene : public cocos2d::Layer
 {
+private:
+	int _life;
 public:
     static cocos2d::Scene* createScene();
 
@@ -22,7 +24,6 @@ public:
 	float ringSpeed[4] = { 25,30,35,40 };
 
 	int _score;
-	int _life;
 
     virtual bool init();
     
@@ -30,6 +31,7 @@ public:
     CREATE_FUNC(StartScene);
 
 	cocos2d::LabelTTF *_labelScore;
+	cocos2d::LabelTTF *_labelLife;
 
 	virtual void onKeyPressed(cocos2d::EventKeyboard::KeyCode key, cocos2d::Event* event);
 	virtual void onKeyReleased(cocos2d::EventKeyboard::KeyCode key, cocos2d::Event* event);
@@ -39,6 +41,11 @@ public:
 	void attachGoal(Ring* ring,int index, const char* mode);
 
 	void createBG();
+	void createLife();
+	bool updateLife(int amount);
+
+	void createBasket();
+
 	void createScore();
 	void updateScore();
 	bool isScoreChanged;
@@ -48,6 +55,7 @@ public:
 	bool keyCheck[128];
 
 	void initSetting();
+	void gameOver(int score);
 
 	bool isLeft;
 	bool isRight;

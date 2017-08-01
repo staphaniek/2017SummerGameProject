@@ -1,7 +1,7 @@
 #include "StartScene.h"
 #include "SimpleAudioEngine.h"
 #include "MyBodyParser.h"
-#include "SimpleAudioEngine.h"
+#include "GameOverScene.h"
 
 bool r = false;
 bool ring1upcheck, ring2upcheck, ring3upcheck, ring4upcheck;
@@ -42,10 +42,16 @@ bool StartScene::init()
 	// 배경화면 렌더링
 	createBG();
 
+	// 점수 렌더링
 	createScore();
 
+	// life 렌더링
+	createLife();
+
+	createBasket();
+
 	// create ring1
-	ring[0] = createRing(2, 0, Color3B(255,0,0) , "c3");
+	ring[0] = createRing(2, 0, Color3B(255, 0, 0) , "c3");
 
 	//create ring2
 	ring[1] = createRing(3, 1, Color3B(255, 127, 0), "d3");
@@ -90,8 +96,6 @@ bool StartScene::onContactBegin(cocos2d::PhysicsContact &contact)
 {
 	PhysicsBody *a = contact.getShapeA()->getBody();
 	PhysicsBody *b = contact.getShapeB()->getBody();
-
-	log("collision %d %d", a->getCollisionBitmask(), b->getCollisionBitmask());
 
 	// check if the bodies have collided
 	if (a->getCollisionBitmask() == BGTAG - 1)
@@ -212,6 +216,10 @@ bool StartScene::onContactBegin(cocos2d::PhysicsContact &contact)
 			{
 				ring[i]->_goal = false;
 			}
+			if (_life <= 0)
+			{
+				gameOver(_score);
+			}
 		});
 		auto sequence = Sequence::create(preCallFunc, action, callFunc, NULL);
 		_ball->runAction(sequence);
@@ -242,6 +250,7 @@ bool StartScene::onContactBegin(cocos2d::PhysicsContact &contact)
 	}
 	if (a->getCollisionBitmask() == BALLTAG && b->getCollisionBitmask() >= RINGDOWNTAG[0] && b->getCollisionBitmask() <= RINGDOWNTAG[3])
 	{
+		log("collision %d %d", a->getCollisionBitmask(), b->getCollisionBitmask());
 		auto tag = b->getCollisionBitmask();
 		for (int i = 0; i < 4; ++i)
 		{
@@ -261,6 +270,7 @@ bool StartScene::onContactBegin(cocos2d::PhysicsContact &contact)
 	}
 	if (b->getCollisionBitmask() == BALLTAG && a->getCollisionBitmask() >= RINGDOWNTAG[0] && a->getCollisionBitmask() <= RINGDOWNTAG[3])
 	{
+		log("collision %d %d", a->getCollisionBitmask(), b->getCollisionBitmask());
 		auto tag = a->getCollisionBitmask();
 		for (int i = 0; i < 4; ++i)
 		{
@@ -382,6 +392,8 @@ void StartScene::update(float fDelta)
 
 void StartScene::onClickThrow(Ref * object)
 {
+	if (!updateLife(-1))
+		log("life not changed");
 	log("Throw!!");
 	auto ball = _ball;
 	ball->removeArrow();
@@ -404,6 +416,7 @@ void StartScene::createBG()
 
 	auto bg = Sprite::create("bg.png");
 	float scale = 1024 / bg->getContentSize().width;
+	bg->setColor(Color3B(128, 128, 0));
 	bg->setScale(scale);
 
 	bg->setPosition(Point(winSize.width / 2, winSize.height / 2));
@@ -452,22 +465,64 @@ void StartScene::initSetting()
 	_life = 5;
 }
 
+void StartScene::createLife()
+{
+	auto visibleSize = Director::getInstance()->getVisibleSize();
+
+	auto life = Sprite::create("bg.png", Rect(0, 0, 200, 100));
+	life->setColor(Color3B(0, 0, 128));
+	life->setAnchorPoint(Vec2(1, 1));
+	life->setPosition(Point(visibleSize.width, visibleSize.height));
+	this->addChild(life);
+
+	auto sprite = Sprite::create("ball1.jpg");
+	float scale = 30 / sprite->getContentSize().width;
+	sprite->setScale(scale);
+	sprite->setPosition(Point(life->getContentSize().width / 2 - 20, life->getContentSize().height / 2));
+	life->addChild(sprite);
+
+	char tmp[10];
+	sprintf(tmp, " X %d", _life);
+	_labelLife = LabelTTF::create(tmp, "arial", 20);
+	_labelLife->setColor(Color3B(0, 0, 0));
+	_labelLife->setPosition(Point(life->getContentSize().width / 2 + 20, life->getContentSize().height / 2));
+
+	life->addChild(_labelLife);
+}
+
+bool StartScene::updateLife(int amount)
+{
+	_life += amount;
+	char tmp[10];
+	sprintf(tmp, " X %d", _life);
+	_labelLife->setString(tmp);
+	return true;
+}
+
 void StartScene::createScore()
 {
 	auto visibleSize = Director::getInstance()->getVisibleSize();
 
 	// 스코어 창
-	auto score = Sprite::create("box_score.png");
+	auto score = Sprite::create("score.png");
 	score->setPosition(Point(score->getContentSize().width / 2, visibleSize.height - score->getContentSize().height / 2));
 	this->addChild(score);
 
 	// 스코어 표시 Label
 	char tmp[10];
 	sprintf(tmp, "%d", _score);
-	_labelScore = LabelTTF::create(tmp, "arial", 20);
-	_labelScore->setPosition(Point(score->getContentSize().width / 2, 22));
+	_labelScore = LabelTTF::create(tmp, "arial", 30);
+	_labelScore->setColor(Color3B(255, 255, 210));
+	_labelScore->setPosition(Point(score->getContentSize().width / 2, 30));
 	// score Sprite에 추가
 	score->addChild(_labelScore);
+}
+
+void StartScene::updateScore()
+{
+	char scoreChar[20];
+	sprintf(scoreChar, "%d", _score);
+	_labelScore->setString(scoreChar);
 }
 
 int getRandomNumber(int x)
@@ -565,9 +620,41 @@ void StartScene::attachGoal(Ring* ring, int index, const char* mode)
 	ring->addChild(object);
 }
 
-void StartScene::updateScore()
+void StartScene::createBasket()
 {
-	char scoreChar[20];
-	sprintf(scoreChar, "%d", _score);
-	_labelScore->setString(scoreChar);
+	Size winSize = Director::getInstance()->getOpenGLView()->getDesignResolutionSize();
+	auto visibleSize = Director::getInstance()->getVisibleSize();
+	Vec2 origin = Director::getInstance()->getVisibleOrigin();
+
+	auto basket = Sprite::create("basket.png");
+	basket->setPosition(Vec2(visibleSize.width, 0));
+
+	MyBodyParser::getInstance()->parseJsonFile("basket.json");
+
+	auto objectBody = MyBodyParser::getInstance()->bodyFormJson(basket, "basket", PHYSICSBODY_MATERIAL_DEFAULT);
+	objectBody->setDynamic(false);
+	objectBody->setCollisionBitmask(50);
+	objectBody->setContactTestBitmask(true);
+	basket->setPhysicsBody(objectBody);
+	basket->setAnchorPoint(Point(1.0, 0.0));
+
+	auto basket1 = Sprite::create("basket.png");
+	basket1->setVisible(false);
+	basket1->setPosition(Vec2(basket->getContentSize().width, 0));
+	auto inBody = MyBodyParser::getInstance()->bodyFormJson(basket1, "in", PHYSICSBODY_MATERIAL_DEFAULT);
+	inBody->setDynamic(false);
+	inBody->setCollisionBitmask(51);
+	inBody->setContactTestBitmask(true);
+	basket1->setPhysicsBody(inBody);
+	basket1->setAnchorPoint(Point(1.0, 0.0));
+	basket->addChild(basket1);
+
+	this->addChild(basket);
+}
+
+void StartScene::gameOver(int score)
+{
+	auto Scene = TransitionCrossFade::create(0.5f, GameOverScene::createScene()); // fade out
+
+	Director::getInstance()->replaceScene(Scene);
 }
