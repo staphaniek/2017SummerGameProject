@@ -1,4 +1,5 @@
 #include "GameOverScene.h"
+#include "GameScene.h"
 #include "StartScene.h"
 
 USING_NS_CC;
@@ -69,7 +70,6 @@ bool GameOverScene::init()
 
 void GameOverScene::onKeyPressed(EventKeyboard::KeyCode key, Event* event)
 {
-	auto ball = this->getChildByTag(BALLTAG);
 	log("onKeyPressed %d", key);
 
 	switch (key)
@@ -99,7 +99,6 @@ void GameOverScene::onKeyPressed(EventKeyboard::KeyCode key, Event* event)
 
 void GameOverScene::onKeyReleased(EventKeyboard::KeyCode key, Event* event)
 {
-	auto ball = this->getChildByTag(BALLTAG);
 	log("onKeyReleased %d", key);
 
 	switch (key)
@@ -121,12 +120,14 @@ void GameOverScene::onKeyReleased(EventKeyboard::KeyCode key, Event* event)
 
 void GameOverScene::onClickRestart(Ref *object)
 {
-	auto Scene = TransitionCrossFade::create(0.5f, StartScene::createScene()); // fade out
+	auto Scene = TransitionCrossFade::create(0.5f, GameScene::createScene()); // fade out
 
 	Director::getInstance()->replaceScene(Scene);
 }
 
 void GameOverScene::onClickHome(Ref *object)
 {
+	auto Scene = TransitionCrossFade::create(0.5f, StartScene::createScene()); // fade out
 
+	Director::getInstance()->replaceScene(Scene);
 }

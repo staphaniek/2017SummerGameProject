@@ -1,11 +1,6 @@
 #pragma once
 #include "cocos2d.h"
 
-const int RINGTAG[4] = { 11, 12, 13, 14 };
-const int RINGUPTAG[4] = { 15, 16, 17, 18 };
-const int RINGDOWNTAG[4] = { 19, 20, 21, 22 };
-const int RINGSIZE[4] = { 200, 180, 160, 140 };
-
 class Ring : public cocos2d::Sprite
 {
 private:

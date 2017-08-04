@@ -15,6 +15,7 @@ Ring::~Ring()
 
 void Ring::initSetting(float speed, const char* melody)
 {
+	_goal = false;
 	_score = 0;
 	_state = UP;
 	_goalCheck = false;
