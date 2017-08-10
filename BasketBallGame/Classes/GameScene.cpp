@@ -2,7 +2,10 @@
 #include "SimpleAudioEngine.h"
 #include "MyBodyParser.h"
 #include "GameOverScene.h"
+#include "Obstacle.h"
 #include "DevConf.h"
+#include "DatabaseManager.h"
+#include "TextInput.h"
 
 bool r = false;
 
@@ -11,7 +14,7 @@ USING_NS_CC;
 Scene* GameScene::createScene()
 {
 	auto scene = Scene::createWithPhysics();
-	//	scene->getPhysicsWorld()->setDebugDrawMask(PhysicsWorld::DEBUGDRAW_ALL);
+//	scene->getPhysicsWorld()->setDebugDrawMask(PhysicsWorld::DEBUGDRAW_ALL);
 
 	scene->getPhysicsWorld()->setGravity(Vec2(0, -98 * 3));
 
@@ -67,6 +70,8 @@ bool GameScene::init()
 
 	createBall();
 
+	createObstacle();
+
 	// collision detection
 	auto contactListener = EventListenerPhysicsContact::create();
 	contactListener->onContactBegin = CC_CALLBACK_1(GameScene::onContactBegin, this);
@@ -83,11 +88,14 @@ bool GameScene::init()
 	return true;
 }
 
+// collision detection
 bool GameScene::onContactBegin(cocos2d::PhysicsContact &contact)
 {
 	PhysicsBody *a = contact.getShapeA()->getBody();
 	PhysicsBody *b = contact.getShapeB()->getBody();
 
+	if (a->getCollisionBitmask() == b->getCollisionBitmask())
+		return false;
 	// check if the bodies have collided
 	if (a->getCollisionBitmask() == BGTAG - 1)
 	{
@@ -179,44 +187,6 @@ bool GameScene::onContactBegin(cocos2d::PhysicsContact &contact)
 			}
 		}
 	}
-	/*
-	if ((RINGTAG[0] == a->getCollisionBitmask() && BGTAG - 1 == b->getCollisionBitmask()) || (BGTAG-1 == a->getCollisionBitmask() && RINGTAG[0] == b->getCollisionBitmask()))
-	{
-	//		log("collision occured");
-	auto body = this->getChildByTag(RINGTAG[0])->getPhysicsBody();
-	body->setVelocity(ring1DownSpeed);
-	}
-	if ((RING1TAG == a->getCollisionBitmask() && RING2TAG == b->getCollisionBitmask()) || (RING2TAG == a->getCollisionBitmask() && RING1TAG == b->getCollisionBitmask()))
-	{
-	//		log("collision occured : ring 1 & ring 2");
-	auto body1 = this->getChildByTag(RING1TAG)->getPhysicsBody();
-	body1->setVelocity(ring1UpSpeed);
-	auto body2 = this->getChildByTag(RING2TAG)->getPhysicsBody();
-	body2->setVelocity(ring2DownSpeed);
-	}
-	if ((RING2TAG == a->getCollisionBitmask() && RING3TAG == b->getCollisionBitmask()) || (RING3TAG == a->getCollisionBitmask() && RING2TAG == b->getCollisionBitmask()))
-	{
-	//		log("collision occured : ring 2 & ring 3");
-	auto body2 = this->getChildByTag(RING2TAG)->getPhysicsBody();
-	body2->setVelocity(ring2UpSpeed);
-	auto body3 = this->getChildByTag(RING3TAG)->getPhysicsBody();
-	body3->setVelocity(ring3DownSpeed);
-	}
-	if ((RING4TAG == a->getCollisionBitmask() && RING3TAG == b->getCollisionBitmask()) || (RING3TAG == a->getCollisionBitmask() && RING4TAG == b->getCollisionBitmask()))
-	{
-	//		log("collision occured : ring 3 & ring 4");
-	auto body3 = this->getChildByTag(RING3TAG)->getPhysicsBody();
-	body3->setVelocity(ring3UpSpeed);
-	auto body4 = this->getChildByTag(RING4TAG)->getPhysicsBody();
-	body4->setVelocity(ring4DownSpeed);
-	}
-	if ((RING4TAG == a->getCollisionBitmask() && BGTAG == b->getCollisionBitmask()) || (BGTAG == a->getCollisionBitmask() && RING4TAG == b->getCollisionBitmask()))
-	{
-	//		log("collision occured : ring 4 & edgebox");
-	auto body4 = this->getChildByTag(RING4TAG)->getPhysicsBody();
-	body4->setVelocity(ring4UpSpeed);
-	}
-	*/
 	if ((BALLTAG == a->getCollisionBitmask() && BGTAG == b->getCollisionBitmask()) || (BGTAG == a->getCollisionBitmask() && BALLTAG == b->getCollisionBitmask()))
 	{
 		isFinish = true;
@@ -395,8 +365,11 @@ void GameScene::update(float fDelta)
 		r = true;
 	}
 
+	// move viewpoint(camera) to the ball's position
+//	if(!r)this->setViewPointCenter(_ball->getPosition());
 }
 
+// call-back function when pressed throw button(now it's keyboard 'x' key)
 void GameScene::onClickThrow(Ref * object)
 {
 	if (!updateLife(-1))
@@ -416,6 +389,7 @@ void GameScene::onClickThrow(Ref * object)
 	ball->getPhysicsBody()->applyTorque(70000);
 }
 
+// create background
 void GameScene::createBG()
 {
 	Size winSize = Director::getInstance()->getOpenGLView()->getDesignResolutionSize();
@@ -424,23 +398,26 @@ void GameScene::createBG()
 
 
 	auto bg = Sprite::create("bg.png");
-	float scale = winSize.width / bg->getContentSize().width;
+	float scale = winSize.width * 2 / bg->getContentSize().width;
 	bg->setColor(Color3B(64, 64, 128));
 	bg->setScale(scale);
-	bg->setPosition(Point(winSize.width / 2, winSize.height / 2));
+//	bg->setPosition(Point(winSize.width / 2, winSize.height / 2));
+	bg->setPosition(Point(0, 0));
+	bg->setAnchorPoint(Point(0, 0));
 	this->addChild(bg, -5);
 
 	// edge Body : 테두리
-	auto edgeBodySize = Size(visibleSize.width + 2, visibleSize.height);
+	auto edgeBodySize = Size(visibleSize.width, visibleSize.height);
 	auto edgeBody = PhysicsBody::createEdgeBox(edgeBodySize, PhysicsMaterial(1, 0.5, 0.8));
 	edgeBody->setCollisionBitmask(BGTAG);
 	edgeBody->setContactTestBitmask(true);
 
 	auto edgeNode = Node::create();
-	edgeNode->setPosition(Point(visibleSize.width / 2 + origin.x, visibleSize.height / 2 + origin.y));
+	edgeNode->setPosition(Point(visibleSize.width / 2,visibleSize.height / 2));
 	edgeNode->setPhysicsBody(edgeBody);
+	edgeNode->setTag(BGTAG);
 
-	this->addChild(edgeNode, -4);
+	bg->addChild(edgeNode, -4);
 
 	auto upperBodySize = Size(11, 100);
 	auto upperEdgeBody = PhysicsBody::createEdgeBox(upperBodySize, PHYSICSBODY_MATERIAL_DEFAULT);
@@ -467,12 +444,14 @@ void GameScene::createBG()
 	this->addChild(lowerEdgeNode, -4);
 }
 
+// initial setting
 void GameScene::initSetting()
 {
 	_score = 0;
 	_life = 5;
 }
 
+// create life board
 void GameScene::createLife()
 {
 	auto visibleSize = Director::getInstance()->getVisibleSize();
@@ -498,6 +477,7 @@ void GameScene::createLife()
 	life->addChild(_labelLife);
 }
 
+// update life for requested amount
 bool GameScene::updateLife(int amount)
 {
 	_life += amount;
@@ -507,6 +487,7 @@ bool GameScene::updateLife(int amount)
 	return true;
 }
 
+// create socre board
 void GameScene::createScore()
 {
 	auto visibleSize = Director::getInstance()->getVisibleSize();
@@ -546,7 +527,7 @@ void GameScene::createBall()
 	auto visibleSize = Director::getInstance()->getVisibleSize();
 	Vec2 origin = Director::getInstance()->getVisibleOrigin();
 
-	Vec2 INITPOS = Vec2(getRandomNumber(visibleSize.width / 2 + origin.x - BALLSIZE) + BALLSIZE, getRandomNumber(origin.y + visibleSize.height / 2 - BALLSIZE) + BALLSIZE);
+	Vec2 INITPOS = Vec2(getRandomNumber(visibleSize.width / 3 + origin.x - BALLSIZE) + BALLSIZE, getRandomNumber(origin.y + visibleSize.height / 2 - BALLSIZE) + BALLSIZE + 20);
 	_ball = initBall(INITPOS);
 	isFinish = false;
 
@@ -563,7 +544,7 @@ Ball* GameScene::initBall(Vec2 &pos)
 
 	ball->setPosition(pos);
 	float scale = BALLSIZE / ball->getContentSize().width;
-	//	ball->setScale(scale);
+	ball->setScale(scale);
 	ball->setAnchorPoint(Point(0.5f, 0.5f));
 
 	// attach ball body
@@ -585,14 +566,14 @@ Ring* GameScene::createRing(int score, int index, Color3B color, const char* mel
 
 	float offset = 10;
 
-	auto object = Ring::spriteWithFile("ring.png", ringSpeed[index], melody);
+	auto object = Ring::spriteWithFile("ring_final.png", ringSpeed[index], melody);
 	object->setColor(color);
 	object->setTag(RINGTAG[index]);
-	float scale = RINGSIZE[index] / object->getContentSize().width;
+	float scale = RINGSIZE[index] / object->getContentSize().height;
 	object->setScale(scale);
 
 	object->setPosition(Vec2(visibleSize.width - offset + origin.x, visibleSize.height / 2 + origin.y));
-	MyBodyParser::getInstance()->parseJsonFile("ring.json");
+	MyBodyParser::getInstance()->parseJsonFile("ring_final.json");
 
 	auto objectBody = MyBodyParser::getInstance()->bodyFormJson(object, "body", PhysicsMaterial(1.0, 0.1, 0.1));
 	objectBody->setCollisionBitmask(RINGTAG[index]);
@@ -614,7 +595,7 @@ Ring* GameScene::createRing(int score, int index, Color3B color, const char* mel
 
 void GameScene::attachGoal(Ring* ring, int index, const char* mode)
 {
-	auto object = Sprite::create("ring.png");
+	auto object = Sprite::create("ring_final.png");
 	object->setVisible(false);
 	object->setPosition(Vec2(ring->getContentSize().width, 0));
 	auto objectBody = MyBodyParser::getInstance()->bodyFormJson(object, mode, PHYSICSBODY_MATERIAL_DEFAULT);
@@ -685,9 +666,32 @@ Holder* GameScene::createHolder(int index, int lifeBonus)
 
 void GameScene::gameOver(int score)
 {
-	auto Scene = TransitionCrossFade::create(0.5f, GameOverScene::createScene()); // fade out
+	// UserDefault를 가져옵니다.
+	auto UserDefault = UserDefault::getInstance();
+	// UserDefault에서 isFirst의 값을 가져옵니다.
+	bool isFirst = UserDefault->getBoolForKey("isFirst", true);
+	if (isFirst || DB_INIT)
+	{
+		DatabaseManager::getInstance()->createDB();
 
-	Director::getInstance()->replaceScene(Scene);
+		// isFirst의 값을 변경함
+		UserDefault->setBoolForKey("isFirst", false);
+		// UserDefault의 값을 변경하였으면 flush()를 호출해야 적용됨.
+		UserDefault->flush();
+	}
+	int lowRankingScore = DatabaseManager::getInstance()->getLowestRankingScore();
+	log("%d", lowRankingScore);
+	if (_score >= lowRankingScore)
+	{
+		// 순위에 드는 경우
+		auto scene = TransitionCrossFade::create(0.5f, TextInput::createScene());
+		Director::getInstance()->replaceScene(scene);
+	}
+	else
+	{
+		auto Scene = TransitionCrossFade::create(0.5f, GameOverScene::createScene(score)); // fade out
+		Director::getInstance()->replaceScene(Scene);
+	}
 }
 
 void GameScene::TurnEnd()
@@ -709,3 +713,35 @@ void GameScene::TurnEnd()
 	auto sequence = Sequence::create(preCallFunc, action, callFunc, NULL);
 	_ball->runAction(sequence);
 }
+
+void GameScene::createObstacle()
+{
+	Size winSize = Director::getInstance()->getOpenGLView()->getDesignResolutionSize();
+	auto visibleSize = Director::getInstance()->getVisibleSize();
+	Vec2 origin = Director::getInstance()->getVisibleOrigin();
+
+	auto sprite1 = Obstacle::spriteWithFile(1);
+	sprite1->setPosition(getRandomNumber(Director::getInstance()->getVisibleSize().width / 2)+winSize.width / 3, 150);
+	sprite1->setTag(obstacleindex);
+	sprite1->attachPhysicsBody(obstacleindex);
+	this->addChild(sprite1);
+	sprite1->addHandFoot();
+	sprite1->attachPhysicsHandFoot(obstacleindex);
+	obstacletag[obstaclepos]=obstacleindex;
+	obstacleindex++;
+	obstaclepos++;
+}
+/*
+// camera view changes on ball's position
+void GameScene::setViewPointCenter(Point position) {
+	Size winSize = Director::sharedDirector()->getWinSize();
+	int x = MAX(position.x, winSize.width / 2);
+	int y = MAX(position.y, winSize.height / 2);
+	if(position.x <= winSize.width/4)x = MIN(x,position.x);
+	if(position.y <= winSize.height/4)y = MIN(y,position.y);
+	Point actualPosition = ccp(x, y);
+	Point centerOfView = ccp(winSize.width / 2, winSize.height / 2);
+	Point viewPoint = ccpSub(centerOfView, actualPosition);
+	this->setPosition(viewPoint);
+}
+*/

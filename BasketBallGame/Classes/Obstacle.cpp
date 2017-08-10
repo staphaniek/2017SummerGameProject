@@ -1,4 +1,6 @@
 #include "Obstacle.h"
+#include "MyBodyParser.h"
+
 
 USING_NS_CC;
 
@@ -32,18 +34,19 @@ void Obstacle::addHandFoot()
 	subAnchor[1] = Point(0.1, 0.5);
 
 	// left foot
-	subPos[3] = Point(this->getBoundingBox().size.width / 6, this->getBoundingBox().size.height / 8);
-	subAnchor[3] = Point(0.75, 0.75);
+	subPos[2] = Point(this->getBoundingBox().size.width / 6, this->getBoundingBox().size.height / 8);
+	subAnchor[2] = Point(0.75, 0.75);
 	
 	// right foot
-	subPos[2] = Point(this->getBoundingBox().size.width * 5 / 6, this->getBoundingBox().size.height / 8);
-	subAnchor[2] = Point(0.25, 0.75);
+	subPos[3] = Point(this->getBoundingBox().size.width * 5 / 6, this->getBoundingBox().size.height / 8);
+	subAnchor[3] = Point(0.25, 0.75);
 	
 	for (int i = 0; i < 4; ++i)
 	{
-		this->attachHandFoot(i,subAnchor[i], subPos[i]);
+		attachHandFoot(i,subAnchor[i], subPos[i]);
+		setAnimation(i);
 	}
-	setAnimation();
+	
 }
 
 Obstacle* Obstacle::spriteWithFile(int type)
@@ -71,50 +74,67 @@ void Obstacle::attachHandFoot(int index,Point anchorPoint, Point initPos)
 	this->addChild(sprite);
 }
 
-void Obstacle::attachPhysicsBody(cocos2d::Ref* object)
+void Obstacle::attachPhysicsBody(int index)
 {
+	MyBodyParser::getInstance()->parseJsonFile("obstacle.json");
+
+	auto body = MyBodyParser::getInstance()->bodyFormJson(this, "body", PhysicsMaterial(1.0, 0.5, 0.1));
+	body->setDynamic(false);
+	body->setCollisionBitmask(index);
+	body->setContactTestBitmask(true);
+	this->setPhysicsBody(body);
 }
 
-void Obstacle::attachPhysicsHandFoot(cocos2d::Ref* object)
+void Obstacle::attachPhysicsHandFoot(int index)
 {
-}
-
-void Obstacle::setAnimation()
-{
-	auto up1 = RotateBy::create(1, -25);
-	auto up2 = RotateBy::create(2, -50);
-	auto down2 = RotateBy::create(2, 50);
-	auto down1 = RotateBy::create(1, 25);
-	auto handSeq = Sequence::create(up1, down2, up1,NULL);
-	auto footSeq = Sequence::create(down1, up2, down1,NULL);
-	RepeatForever* action[4];
-	action[0] = RepeatForever::create(footSeq);
-	action[1] = RepeatForever::create(handSeq);
-	action[2] = RepeatForever::create(footSeq);
-	action[3] = RepeatForever::create(handSeq);
-
-	this->getChildByTag(0)->runAction(action[0]);
-	this->getChildByTag(1)->runAction(action[1]);
-	this->getChildByTag(3)->runAction(action[3]);
-	this->getChildByTag(2)->runAction(action[2]);
-	/*
 	for (int i = 0; i < 4; ++i)
 	{
-		if (i % 2 == 0)
-		{
-			// hand animation
-			this->getChildByTag(i)->runAction(cwRepeat);
-		}
-		else
-		{
-			// foot animation
-			this->getChildByTag(i)->runAction(ccwRepeat);
-		}
+		auto body = PhysicsBody::createCircle(this->getChildByTag(0)->getBoundingBox().size.width / 2, PhysicsMaterial(0, 0.5, 0.1));
+
+		body->setDynamic(false);
+		body->setGravityEnable(false);
+		body->setCollisionBitmask(index);
+		body->setContactTestBitmask(true);
+		this->getChildByTag(i)->setPhysicsBody(body);
 	}
-	*/
+}
+
+void Obstacle::setAnimation(int index)
+{
+	if (index == 0 || index == 3)
+	{
+		setCWAnimation(index);
+	}
+	else
+	{
+		setCCWAnimation(index);
+	}
+}
+
+void Obstacle::setCWAnimation(int index)
+{
+	auto anim1 = RotateBy::create(smallAminTime, smallCWDegree);
+	auto anim2 = RotateBy::create(largeAnimTime, largeCCWDegree);
+	auto anim3 = RotateBy::create(smallAminTime, smallCWDegree);
+	auto seq = Sequence::create(anim1, anim2, anim3, NULL);
+	auto act = RepeatForever::create(seq);
+	this->getChildByTag(index)->runAction(act);
+}
+
+void Obstacle::setCCWAnimation(int index)
+{
+	auto anim1 = RotateBy::create(smallAminTime, smallCCWDegree);
+	auto anim2 = RotateBy::create(largeAnimTime, largeCWDegree);
+	auto anim3 = RotateBy::create(smallAminTime, smallCCWDegree);
+	auto seq = Sequence::create(anim1, anim2, anim3, NULL);
+	auto act = RepeatForever::create(seq);
+	this->getChildByTag(index)->runAction(act);
 }
 
 void Obstacle::resetAnimation()
 {
-
+	for (int i = 0; i < 4; ++i)
+	{
+		this->getChildByTag(i)->stopAllActions();
+	}
 }

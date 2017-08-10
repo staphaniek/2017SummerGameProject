@@ -28,8 +28,6 @@ public:
 
 	float ringSpeed[4] = { 30,35,40,45 };
 
-	int _score;
-
 	virtual bool init();
 
 	// implement the "static create()" method manually
@@ -49,6 +47,8 @@ public:
 
 	void attachGoal(Ring* ring, int index, const char* mode);
 
+	void createObstacle();
+
 	void createBG();
 	void createLife();
 	bool updateLife(int amount);
@@ -63,6 +63,7 @@ public:
 
 	void initSetting();
 	void gameOver(int score);
+	bool scoreHanding(int score);
 
 	bool isLeft;
 	bool isRight;

@@ -1,6 +1,7 @@
 #include "GameOverScene.h"
 #include "GameScene.h"
 #include "StartScene.h"
+#include "DevConf.h"
 
 USING_NS_CC;
 
@@ -14,10 +15,12 @@ GameOverScene::~GameOverScene()
 {
 }
 
-Scene* GameOverScene::createScene()
+Scene* GameOverScene::createScene(int score)
 {
 	// scene : autorelease object
 	auto scene = Scene::create();
+	
+	_score = score;
 
 	// layer : autorelease object
 	auto layer = GameOverScene::create();
@@ -50,7 +53,6 @@ bool GameOverScene::init()
 	button1->setTag(0);
 	button1->setPosition(Point(winSize.width / 2, 300));
 	button1->selected();
-//	button1->unselected();
 
 	button2 = MenuItemImage::create("HomeButton.png", "HomeButton_on.png", CC_CALLBACK_1(GameOverScene::onClickHome, this));
 	button2->setTag(1);
@@ -60,11 +62,11 @@ bool GameOverScene::init()
 	menu->setPosition(Point::ZERO);
 	this->addChild(menu);
 
-
 	auto keyListener = EventListenerKeyboard::create();
 	keyListener->onKeyPressed = CC_CALLBACK_2(GameOverScene::onKeyPressed, this);
 	keyListener->onKeyReleased = CC_CALLBACK_2(GameOverScene::onKeyReleased, this);
 	Director::getInstance()->getEventDispatcher()->addEventListenerWithSceneGraphPriority(keyListener, this);
+
 	return true;
 }
 
