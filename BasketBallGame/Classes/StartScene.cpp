@@ -1,6 +1,7 @@
 #include "StartScene.h"
 #include "GameScene.h"
 #include "Obstacle.h"
+#include "RankingScene.h"
 
 USING_NS_CC;
 
@@ -133,7 +134,9 @@ void StartScene::onClickStart(Ref* object)
 
 void StartScene::onClickRanking(Ref* object)
 {
+	auto Scene = TransitionCrossFade::create(0.5f, RankingScene::createScene(false)); // fade out
 
+	Director::getInstance()->replaceScene(Scene);
 }
 
 void StartScene::onClickExit(Ref* object)

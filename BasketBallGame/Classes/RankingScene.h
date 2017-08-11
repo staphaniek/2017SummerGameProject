@@ -9,11 +9,15 @@ class RankingScene : public Layer
 {
 public:
 
-	static Scene* createScene(int mode);
+	static Scene* createScene(bool mode);
 
 	virtual bool init();
 
 	CREATE_FUNC(RankingScene);
+
+	virtual void onKeyPressed(cocos2d::EventKeyboard::KeyCode key, cocos2d::Event* event);
+
+	void onClickOK(Ref * object);
 
 	RankingScene();
 	~RankingScene();

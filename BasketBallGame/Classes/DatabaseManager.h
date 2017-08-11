@@ -15,7 +15,7 @@ struct Score
 {
 public:
 	int score;
-	char *_name;
+	char* _name;
 };
 
 class DatabaseManager
@@ -38,6 +38,7 @@ public:
 	int getLowestRankingScore();
 	bool insertDB(const string name, const int score);
 	list<Score*> selectDB();
+	bool deleteDB();
 
 //	int insertCharacterDB(*characterInfo);
 //	void deleteCharacterDB(int no);

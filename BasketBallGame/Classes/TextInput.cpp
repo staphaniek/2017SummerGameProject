@@ -356,7 +356,7 @@ void TextInput::onClickSubmit(Ref *object)
 	if (DatabaseManager::getInstance()->insertDB(textfield->getString(), _score))
 	{
 		log("submit");
-		auto Scene = TransitionCrossFade::create(0.5f, RankingScene::createScene(1)); // fade out
+		auto Scene = TransitionCrossFade::create(0.5f, RankingScene::createScene(true)); // fade out
 		Director::getInstance()->replaceScene(Scene);
 	}
 }
@@ -364,6 +364,6 @@ void TextInput::onClickSubmit(Ref *object)
 void TextInput::onClickCancel(Ref *object)
 {
 	log("Cancel");
-	auto Scene = TransitionCrossFade::create(0.5f, GameOverScene::createScene(_score)); // fade out
+	auto Scene = TransitionCrossFade::create(0.5f, GameOverScene::createScene()); // fade out
 	Director::getInstance()->replaceScene(Scene);
 }

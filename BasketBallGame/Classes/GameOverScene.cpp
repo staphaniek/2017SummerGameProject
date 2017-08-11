@@ -15,12 +15,10 @@ GameOverScene::~GameOverScene()
 {
 }
 
-Scene* GameOverScene::createScene(int score)
+Scene* GameOverScene::createScene()
 {
 	// scene : autorelease object
 	auto scene = Scene::create();
-	
-	_score = score;
 
 	// layer : autorelease object
 	auto layer = GameOverScene::create();

@@ -1,9 +1,12 @@
 #include "RankingScene.h"
+#include "DatabaseManager.h"
+#include "StartScene.h"
+#include "GameOverScene.h"
 
 // 0 : startScene에서 넘어온 경우, 1 : Game이 끝났을 때 불러진 경우
-int _mode;
+bool _mode = false;
 
-Scene* RankingScene::createScene(int mode)
+Scene* RankingScene::createScene(bool mode)
 {
 	// scene : autorelease object
 	auto scene = Scene::create();
@@ -41,39 +44,139 @@ bool RankingScene::init()
 	Vec2 origin = Director::getInstance()->getVisibleOrigin();
 
 	auto back = Sprite::create("rankingscenebg.png");
-	float scale = winSize.height / back->getContentSize().height;
+	float scale = winSize.width / back->getContentSize().width;
 	back->setScale(scale);
 	back->setPosition(Point(winSize.width / 2, winSize.height / 2));
 	this->addChild(back);
 	auto backSize = winSize;// back->getBoundingBox().size;
 
 	Point rankingpos[10] = {
-		Point(backSize.width * 1 / 10, backSize.height),
-		Point(backSize.width * 1 / 10, backSize.height * 7 / 8),
-		Point(backSize.width * 1 / 10, backSize.height * 6 / 8),
-		Point(backSize.width * 1 / 10, backSize.height * 5 / 8),
-		Point(backSize.width * 1 / 10, backSize.height * 4 / 8),
-		Point(backSize.width * 9 / 10, backSize.height),
-		Point(backSize.width * 9 / 10, backSize.height * 7 / 8),
-		Point(backSize.width * 9 / 10, backSize.height * 6 / 8),
-		Point(backSize.width * 9 / 10, backSize.height * 5 / 8),
-		Point(backSize.width * 9 / 10, backSize.height * 4 / 8),
+		Point(backSize.width * 1 / 11, backSize.height * 15 / 16),
+		Point(backSize.width * 1 / 11, backSize.height * 12 / 16),
+		Point(backSize.width * 1 / 11, backSize.height * 9 / 16),
+		Point(backSize.width * 1 / 11, backSize.height * 6 / 16),
+		Point(backSize.width * 1 / 11, backSize.height * 3 / 16),
+		Point(backSize.width * 9 / 10, backSize.height * 15 / 16),
+		Point(backSize.width * 9 / 10, backSize.height * 12 / 16),
+		Point(backSize.width * 9 / 10, backSize.height * 9 / 16),
+		Point(backSize.width * 9 / 10, backSize.height * 6 / 16),
+		Point(backSize.width * 9 / 10, backSize.height * 3 / 16),
 	};
 
 	for (int i = 0; i < 10; i++)
 	{
+		// ranking unit 배경
 		auto unit = Sprite::create("rankingunit.png");
 		unit->setAnchorPoint(Point(0, 0));
-//		unit->setScale(scale);
 		unit->setPosition(rankingpos[i]);
+		unit->setTag(i);
 		back->addChild(unit);
+
+		// ranking position 배경
+		auto rankingNumberbg = Sprite::create("rankingnumber.png");
+		if (i == 0)
+		{
+			// 금왕관
+			rankingNumberbg->setColor(Color3B(255, 215, 0)); // gold
+			auto crown = Sprite::create("goldmedal.png");
+			crown->setAnchorPoint(Point(0, 0));
+			crown->setPosition(Point(-12, rankingNumberbg->getContentSize().height - 15));
+			rankingNumberbg->addChild(crown);
+		}
+		else if (i == 1)
+		{
+			// 은왕관
+			rankingNumberbg->setColor(Color3B(192, 192, 192));
+			auto crown = Sprite::create("silvermedal.png");
+			crown->setAnchorPoint(Point(0, 0));
+			crown->setPosition(Point(-30, rankingNumberbg->getContentSize().height - 40));
+			rankingNumberbg->addChild(crown);
+		}
+		else if (i == 2)
+		{
+			// 동왕관
+			rankingNumberbg->setColor(Color3B(215, 127, 50));
+			auto crown= Sprite::create("bronzemedal.png");
+			crown->setAnchorPoint(Point(0,0));
+			crown->setPosition(Point(-8, rankingNumberbg->getContentSize().height));
+			rankingNumberbg->addChild(crown);
+		}
+		else
+		{
+			// 나머지 배경들
+			rankingNumberbg->setColor(Color3B(255, 156, 63));
+		}
+		rankingNumberbg->setPosition(Point(unit->getContentSize().width / 7.0, unit->getContentSize().height / 2.0));
+		unit->addChild(rankingNumberbg);
+
+		// 랭킹 숫자
+		char tmp[3];
+		sprintf(tmp, "%d", i + 1);
+		auto rankingNumber = LabelTTF::create(tmp, "Arial", 40);
+		rankingNumber->setPosition(Point(rankingNumberbg->getContentSize().width / 2, rankingNumberbg->getContentSize().height / 2));
+		rankingNumberbg->addChild(rankingNumber);
 	}
 
-	auto rankingnumber = Sprite::create("rankingnumber.png");
-	rankingnumber->setPosition(Point(winSize.width / 2, winSize.height / 2));
-	back->addChild(rankingnumber);
+	// rankList 가져오기
+	list<Score*> rankList = DatabaseManager::getInstance()->selectDB();
+	int size = rankList.size();
 
+	for (int i = 0; i < size; i++)
+	{
+		auto unit = back->getChildByTag(i);
+		char tmp[50];
+		sprintf(tmp, "%s", rankList.front()->_name);
+		auto nameLabel = LabelTTF::create(tmp, "Arial", 40);
+		nameLabel->setAnchorPoint(Point(0, 0.5));
+		nameLabel->setHorizontalAlignment(TextHAlignment::LEFT);
+		nameLabel->setFontFillColor(Color3B(5, 5, 5), true);
+		nameLabel->setPosition(Point(unit->getContentSize().width * 3 / 9.0, unit->getContentSize().height / 2.0));
+		unit->addChild(nameLabel);
+		sprintf(tmp, "%d", rankList.front()->score);
+		auto scoreLabel = LabelTTF::create(tmp, "Arial", 40);
+		scoreLabel->setFontFillColor(Color3B(5, 5, 5), true);
+		scoreLabel->setPosition(Point(unit->getContentSize().width * 9 / 10.0, unit->getContentSize().height / 2.0));
+		unit->addChild(scoreLabel);
+		rankList.pop_front();
+	}
 
+	auto ok = MenuItemImage::create("okbutton.png", "okbutton_on.png", CC_CALLBACK_1(RankingScene::onClickOK, this));
+	ok->setPosition(back->getContentSize().width / 2, winSize.height / 12);
+
+	auto menu = Menu::create(ok, NULL);
+	menu->setPosition(Point::ZERO);
+	back->addChild(menu);
+
+	auto keyListener = EventListenerKeyboard::create();
+	keyListener->onKeyPressed = CC_CALLBACK_2(RankingScene::onKeyPressed, this);
+	Director::getInstance()->getEventDispatcher()->addEventListenerWithSceneGraphPriority(keyListener, this);
 
 	return true;
+}
+
+void RankingScene::onKeyPressed(cocos2d::EventKeyboard::KeyCode key, cocos2d::Event* event)
+{
+	switch (key)
+	{
+	case EventKeyboard::KeyCode::KEY_ENTER:
+	case EventKeyboard::KeyCode::KEY_ESCAPE:
+		onClickOK(this);
+		break;
+	}
+}
+
+void RankingScene::onClickOK(Ref* object)
+{
+	if (_mode)
+	{
+		auto Scene = TransitionCrossFade::create(0.5f, GameOverScene::createScene()); // fade out
+
+		Director::getInstance()->replaceScene(Scene);
+	}
+	else
+	{
+		auto Scene = TransitionCrossFade::create(0.5f, StartScene::createScene()); // fade out
+
+		Director::getInstance()->replaceScene(Scene);
+	}
 }

@@ -11,7 +11,7 @@ public:
 	cocos2d::MenuItemImage* button1;
 	cocos2d::MenuItemImage* button2;
 
-	static cocos2d::Scene* createScene(int score);
+	static cocos2d::Scene* createScene();
 
 	CREATE_FUNC(GameOverScene);
 
