@@ -157,7 +157,6 @@ xcopy "$(ProjectDir)..\Resources" "$(OutDir)" /D /E /I /F /Y
     <ClCompile Include="..\Classes\Obstacle.cpp" />
     <ClCompile Include="..\Classes\RankingScene.cpp" />
     <ClCompile Include="..\Classes\Ring.cpp" />
-    <ClCompile Include="..\Classes\ShowRanking.cpp" />
     <ClCompile Include="..\Classes\sqlite3.c" />
     <ClCompile Include="..\Classes\StartScene.cpp" />
     <ClCompile Include="..\Classes\TextInput.cpp" />
@@ -175,7 +174,6 @@ xcopy "$(ProjectDir)..\Resources" "$(OutDir)" /D /E /I /F /Y
     <ClInclude Include="..\Classes\Obstacle.h" />
     <ClInclude Include="..\Classes\RankingScene.h" />
     <ClInclude Include="..\Classes\Ring.h" />
-    <ClInclude Include="..\Classes\ShowRanking.h" />
     <ClInclude Include="..\Classes\sqlite3.h" />
     <ClInclude Include="..\Classes\StartScene.h" />
     <ClInclude Include="..\Classes\TextInput.h" />

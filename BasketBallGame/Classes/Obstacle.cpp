@@ -7,13 +7,17 @@ USING_NS_CC;
 Obstacle::Obstacle()
 {
 	_type = 1;
-	_state = IDLE;
+	_state = true;
+	upSpeed = Vec2(0, 35);
+	downSpeed = Vec2(0, -35);
 }
 
 Obstacle::Obstacle(int type)
 {
 	_type = type;
-	_state = IDLE;
+	_state = true;
+	upSpeed = Vec2(0, 35);
+	downSpeed = Vec2(0, -35);
 }
 
 Obstacle::~Obstacle()
@@ -136,5 +140,23 @@ void Obstacle::resetAnimation()
 	for (int i = 0; i < 4; ++i)
 	{
 		this->getChildByTag(i)->stopAllActions();
+	}
+}
+
+void Obstacle::changeDir()
+{
+	_state = (!_state);
+	setVelocity();
+}
+
+void Obstacle::setVelocity()
+{
+	if (_state)
+	{
+		this->getPhysicsBody()->setVelocity(upSpeed);
+	}
+	else
+	{
+		this->getPhysicsBody()->setVelocity(downSpeed);
 	}
 }

@@ -9,7 +9,7 @@ USING_NS_CC_EXT;
 class TextInput : public Layer, public extension::EditBoxDelegate
 {
 public:
-	static cocos2d::Scene* createScene();
+	static cocos2d::Scene* createScene(int score);
 
 	TextInput();
 	~TextInput();

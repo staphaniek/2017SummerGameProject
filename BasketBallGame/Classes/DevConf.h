@@ -7,6 +7,7 @@
 static int _level = 1;
 static int _stage = 1;
 static int _score = 0;
+static int _life = 5;
 
 // datas for ball
 const int BALLTAG = 1;
@@ -27,7 +28,16 @@ static int obstacleindex = 201;
 const float OBSTACLESIZE = 80, OBSTACLEHANDFOOTSIZE = 40;
 
 // 무지개색
-//const cocos2d::Color3B rainbow[7] = { cocos2d::Color3B(255, 0 , 0), cocos2d::Color3B(255, 127, 0) , cocos2d::Color3B(255, 255, 0) , cocos2d::Color3B(0, 255, 0) , cocos2d::Color3B(0, 0, 255) , cocos2d::Color3B(75, 0, 130) , cocos2d::Color3B(148, 0, 211) };
+/*
+const cocos2d::Color3B rainbow[7] = {
+cocos2d::Color3B(255, 0 , 0),
+cocos2d::Color3B(255, 127, 0) ,
+cocos2d::Color3B(255, 255, 0) ,
+cocos2d::Color3B(0, 255, 0) ,
+cocos2d::Color3B(0, 0, 255) ,
+cocos2d::Color3B(75, 0, 130),
+cocos2d::Color3B(148, 0, 211) };
+*/
 
 // tags for obstacle
 

@@ -10,10 +10,8 @@ const int BGTAG = 100;
 
 class GameScene : public cocos2d::Layer
 {
-private:
-	int _life;
 public:
-	static cocos2d::Scene* createScene();
+	static cocos2d::Scene* createScene(int level, int stage, int score, int life);
 
 	Ball* _ball;
 	Ball* initBall(cocos2d::Vec2 &pos);
@@ -62,8 +60,9 @@ public:
 	bool keyCheck[128];
 
 	void initSetting();
+	void createStartSignal();
+
 	void gameOver(int score);
-	bool scoreHanding(int score);
 
 	bool isLeft;
 	bool isRight;

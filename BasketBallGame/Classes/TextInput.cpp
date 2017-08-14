@@ -4,10 +4,14 @@
 #include "RankingScene.h"
 #include <string>
 
-cocos2d::Scene* TextInput::createScene()
+Score recent;
+
+cocos2d::Scene* TextInput::createScene(int score)
 {
 	// scene : autorelease object
 	auto scene = Scene::create();
+	recent = Score();
+	recent.score = score;
 
 	// layer : autorelease object
 	auto layer = TextInput::create();
@@ -36,19 +40,6 @@ bool TextInput::init()
 	if (!Layer::init())
 	{
 		return false;
-	}
-	// UserDefault를 가져옵니다.
-	auto UserDefault = UserDefault::getInstance();
-	// UserDefault에서 isFirst의 값을 가져옵니다.
-	bool isFirst = UserDefault->getBoolForKey("isFirst", true);
-	if (true)
-	{
-		DatabaseManager::getInstance()->createDB();
-
-		// isFirst의 값을 변경함
-		UserDefault->setBoolForKey("isFirst", false);
-		// UserDefault의 값을 변경하였으면 flush()를 호출해야 적용됨.
-		UserDefault->flush();
 	}
 
 	auto winSize = Director::getInstance()->getOpenGLView()->getDesignResolutionSize();
@@ -353,10 +344,10 @@ void TextInput::eraseOneLetter()
 void TextInput::onClickSubmit(Ref *object)
 {
 	CCTextFieldTTF* textfield = (CCTextFieldTTF *)this->getChildByTag(0)->getChildByTag(1);
-	if (DatabaseManager::getInstance()->insertDB(textfield->getString(), _score))
+	if (DatabaseManager::getInstance()->insertDB(textfield->getString(), recent.score))
 	{
 		log("submit");
-		auto Scene = TransitionCrossFade::create(0.5f, RankingScene::createScene(true,textfield->getString(),_score)); // fade out
+		auto Scene = TransitionCrossFade::create(0.5f, RankingScene::createScene(true,textfield->getString(),recent.score)); // fade out
 		Director::getInstance()->replaceScene(Scene);
 	}
 }

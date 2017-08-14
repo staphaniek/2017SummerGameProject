@@ -91,6 +91,7 @@ void DatabaseManager::createDB()
 
 int DatabaseManager::getLowestRankingScore()
 {
+	if (checkCount() < 10)return 0;
 	string query;
 
 	query = "select SCORE from TB_SCORE order by SCORE asc limit 1";
@@ -190,4 +191,26 @@ bool DatabaseManager::deleteDB()
 		log("ERROR CODE : %d, ERROR MSG : %s", _result, _errorMSG);
 		return false;
 	}
+}
+
+int DatabaseManager::checkCount()
+{
+	int cnt = 0;
+	{
+		sqlite3_stmt *pStmt = NULL;
+		string query = "select count(*) from TB_SCORE";
+		_result = sqlite3_prepare_v2(_sqlite, query.c_str(), query.length(), &pStmt, NULL);
+
+		if (_result == SQLITE_OK)
+		{
+			log("selectDB() SUCCESS");
+			if (sqlite3_step(pStmt) == SQLITE_ROW)
+			{
+				cnt = sqlite3_column_int(pStmt, 0);
+			}
+		}
+		sqlite3_finalize(pStmt);
+	}
+
+	return cnt;
 }

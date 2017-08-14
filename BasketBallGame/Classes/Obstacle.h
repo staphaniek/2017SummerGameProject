@@ -12,12 +12,18 @@ class Obstacle : public cocos2d::Sprite
 {
 public:
 	int _type;
-	enum state{IDLE,DEAD} _state;
+	bool _state;
 
 	cocos2d::Sprite* _leftHand;
 	cocos2d::Sprite* _rightHand;
 	cocos2d::Sprite* _leftFoot;
 	cocos2d::Sprite* _rightFoot;
+
+	cocos2d::Vec2 upSpeed;
+	cocos2d::Vec2 downSpeed;
+
+	void changeDir();
+	void setVelocity();
 
 	static Obstacle* spriteWithFile(int type);
 	void addHandFoot();

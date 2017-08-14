@@ -11,10 +11,15 @@ bool r = false;
 
 USING_NS_CC;
 
-Scene* GameScene::createScene()
+Scene* GameScene::createScene(int level, int stage, int score, int life)
 {
 	auto scene = Scene::createWithPhysics();
 //	scene->getPhysicsWorld()->setDebugDrawMask(PhysicsWorld::DEBUGDRAW_ALL);
+
+	_level = level;
+	_stage = stage;
+	_score = score;
+	_life = life;
 
 	scene->getPhysicsWorld()->setGravity(Vec2(0, -98 * 3));
 
@@ -40,6 +45,8 @@ bool GameScene::init()
 	auto visibleSize = Director::getInstance()->getVisibleSize();
 	Vec2 origin = Director::getInstance()->getVisibleOrigin();
 
+	createStartSignal();
+
 	initSetting();
 
 	// 배경화면 렌더링
@@ -56,17 +63,49 @@ bool GameScene::init()
 	_holder[0] = createHolder(0, 3);
 	_holder[1] = createHolder(1, 1);
 
-	// create ring1
-	_ring[0] = createRing(2, 0, Color3B(255, 0, 0), "c3");
+	if (_stage == 1)
+	{
+		// create ring1
+		_ring[0] = createRing(2, 0, Color3B(255, 0, 0), "c3");
 
-	//create ring2
-	_ring[1] = createRing(3, 1, Color3B(255, 127, 0), "d3");
+		//create ring2
+		_ring[1] = createRing(3, 1, Color3B(255, 127, 0), "d3");
 
-	// create ring3
-	_ring[2] = createRing(4, 2, Color3B(255, 255, 0), "e3");
+		// create ring3
+		_ring[2] = createRing(4, 2, Color3B(255, 255, 0), "e3");
 
-	// create ring4
-	_ring[3] = createRing(5, 3, Color3B(0, 128, 0), "f3");
+		// create ring4
+		_ring[3] = createRing(5, 3, Color3B(0, 128, 0), "f3");
+	}
+	else if (_stage == 2)
+	{
+		//create ring1
+		_ring[0] = createRing(3, 0, Color3B(255, 255, 0), "e3");
+
+		// create ring2
+		_ring[1] = createRing(4, 1, Color3B(0, 128, 0), "f3");
+
+		// create ring3
+		_ring[2] = createRing(5, 2, Color3B(0, 0, 255), "g3");
+
+		// create ring4
+		_ring[3] = createRing(6, 3, Color3B(75, 0, 130), "a3");
+	}
+	else
+	{
+		// stage 3
+		//create ring1
+		_ring[0] = createRing(4, 0, Color3B(0, 0, 255), "g3");
+
+		// create ring2
+		_ring[1] = createRing(5, 1, Color3B(75, 0, 130), "a3");
+
+		// create ring3
+		_ring[2] = createRing(6, 2, Color3B(148, 0, 211), "b3");
+
+		// create ring4
+		_ring[3] = createRing(7, 3, Color3B(255, 0, 0), "c4");
+	}
 
 	createBall();
 
@@ -108,6 +147,13 @@ bool GameScene::onContactBegin(cocos2d::PhysicsContact &contact)
 				_ring[i]->changeDir();
 			}
 		}
+		for (int i = 201; i < obstacleindex; i++)
+		{
+			if (tag == i && ((Obstacle*)this->getChildByTag(i))->_state)
+			{
+				((Obstacle*)this->getChildByTag(i))->changeDir();
+			}
+		}
 	}
 	if (b->getCollisionBitmask() == BGTAG - 1)
 	{
@@ -118,6 +164,13 @@ bool GameScene::onContactBegin(cocos2d::PhysicsContact &contact)
 			if (RINGTAG[i] == tag && _ring[i] != NULL && _ring[i]->_state)
 			{
 				_ring[i]->changeDir();
+			}
+		}
+		for (int i = 201; i < obstacleindex; i++)
+		{
+			if (tag == i && ((Obstacle*)this->getChildByTag(i))->_state)
+			{
+				((Obstacle*)this->getChildByTag(i))->changeDir();
 			}
 		}
 	}
@@ -132,6 +185,13 @@ bool GameScene::onContactBegin(cocos2d::PhysicsContact &contact)
 				_ring[i]->changeDir();
 			}
 		}
+		for (int i = 201; i < obstacleindex; i++)
+		{
+			if (tag == i && !((Obstacle*)this->getChildByTag(i))->_state)
+			{
+				((Obstacle*)this->getChildByTag(i))->changeDir();
+			}
+		}
 	}
 	if (b->getCollisionBitmask() == BGTAG - 2)
 	{
@@ -142,6 +202,23 @@ bool GameScene::onContactBegin(cocos2d::PhysicsContact &contact)
 			if (RINGTAG[i] == tag && _ring[i] != NULL && !_ring[i]->_state)
 			{
 				_ring[i]->changeDir();
+			}
+		}
+		for (int i = 201; i < obstacleindex; i++)
+		{
+			if (tag == i && !((Obstacle*)this->getChildByTag(i))->_state)
+			{
+				((Obstacle*)this->getChildByTag(i))->changeDir();
+			}
+		}
+	}
+	if (a->getCollisionBitmask() >= 201 && a->getCollisionBitmask() < obstacleindex && b->getCollisionBitmask() >= 201 && b->getCollisionBitmask() < obstacleindex)
+	{
+		for (int i = 201; i < obstacleindex; i++)
+		{
+			if (a->getCollisionBitmask() == i || b->getCollisionBitmask() == i)
+			{
+				((Obstacle*)this->getChildByTag(i))->changeDir();
 			}
 		}
 	}
@@ -358,6 +435,25 @@ void GameScene::update(float fDelta)
 		if (isScoreChanged)
 		{
 			updateScore();
+			if (_stage == 1 && _score % 1320 >= 120)
+			{
+				_stage = 2;
+				auto Scene = TransitionCrossFade::create(0.5f, GameScene::createScene(_level,_stage,_score,_life)); // fade out
+				Director::getInstance()->replaceScene(Scene);
+			}
+			else if (_stage == 2 && _score % 1320 >= 480)
+			{
+				_stage = 3;
+				auto Scene = TransitionCrossFade::create(0.5f, GameScene::createScene(_level, _stage, _score,_life)); // fade out
+				Director::getInstance()->replaceScene(Scene);
+			}
+			else if (_stage == 3 && (_score + 840) % 1320 >= 840)
+			{
+				_level++;
+				_stage = 1;
+				auto Scene = TransitionCrossFade::create(0.5f, GameScene::createScene(_level, _stage, _score,_life)); // fade out
+				Director::getInstance()->replaceScene(Scene);
+			}
 			isScoreChanged = false;
 		}
 		log("here");
@@ -392,6 +488,7 @@ void GameScene::onClickThrow(Ref * object)
 // create background
 void GameScene::createBG()
 {
+	// size 가져오기
 	Size winSize = Director::getInstance()->getOpenGLView()->getDesignResolutionSize();
 	auto visibleSize = Director::getInstance()->getVisibleSize();
 	Vec2 origin = Director::getInstance()->getVisibleOrigin();
@@ -401,7 +498,6 @@ void GameScene::createBG()
 	float scale = winSize.width * 2 / bg->getContentSize().width;
 	bg->setColor(Color3B(64, 64, 128));
 	bg->setScale(scale);
-//	bg->setPosition(Point(winSize.width / 2, winSize.height / 2));
 	bg->setPosition(Point(0, 0));
 	bg->setAnchorPoint(Point(0, 0));
 	this->addChild(bg, -5);
@@ -419,7 +515,7 @@ void GameScene::createBG()
 
 	bg->addChild(edgeNode, -4);
 
-	auto upperBodySize = Size(11, 100);
+	auto upperBodySize = Size(winSize.width, 50);
 	auto upperEdgeBody = PhysicsBody::createEdgeBox(upperBodySize, PHYSICSBODY_MATERIAL_DEFAULT);
 	upperEdgeBody->setCollisionBitmask(BGTAG - 1);
 	upperEdgeBody->setContactTestBitmask(true);
@@ -431,7 +527,7 @@ void GameScene::createBG()
 
 	this->addChild(upperEdgeNode, -4);
 
-	auto lowerBodySize = Size(11, 66);
+	auto lowerBodySize = Size(winSize.width, 66);
 	auto lowerEdgeBody = PhysicsBody::createEdgeBox(lowerBodySize, PHYSICSBODY_MATERIAL_DEFAULT);
 	lowerEdgeBody->setCollisionBitmask(BGTAG - 2);
 	lowerEdgeBody->setContactTestBitmask(true);
@@ -443,12 +539,31 @@ void GameScene::createBG()
 
 	this->addChild(lowerEdgeNode, -4);
 }
+void GameScene::createStartSignal()
+{
+	Size winSize = Director::getInstance()->getOpenGLView()->getDesignResolutionSize();
+
+	auto sprite = Sprite::create("startsign.png");
+	sprite->setPosition(winSize.width / 2, winSize.height / 2);
+
+	char tmp[50];
+	sprintf(tmp, "Level %d\nStage %d", _level, _stage);
+	auto levelStageLabel = LabelTTF::create(tmp, "Arial", 50);
+	levelStageLabel->setPosition(sprite->getContentSize().width / 2, sprite->getContentSize().height / 2);
+	this->addChild(sprite, 20);
+	sprite->addChild(levelStageLabel);
+	auto labelAction = FadeOut::create(5);
+	levelStageLabel->runAction(labelAction);
+
+	auto action = FadeOut::create(5);
+	auto action1 = CallFunc::create([=]() {sprite->removeFromParentAndCleanup(true); });
+	auto seq = Sequence::create(action, action1, NULL);
+	sprite->runAction(seq);
+}
 
 // initial setting
 void GameScene::initSetting()
 {
-	_score = 0;
-	_life = 5;
 }
 
 // create life board
@@ -565,6 +680,7 @@ Ring* GameScene::createRing(int score, int index, Color3B color, const char* mel
 	Vec2 origin = Director::getInstance()->getVisibleOrigin();
 
 	float offset = 10;
+	float heightOffset = 200 + 150 * (index);
 
 	auto object = Ring::spriteWithFile("ring_final.png", ringSpeed[index], melody);
 	object->setColor(color);
@@ -572,7 +688,7 @@ Ring* GameScene::createRing(int score, int index, Color3B color, const char* mel
 	float scale = RINGSIZE[index] / object->getContentSize().height;
 	object->setScale(scale);
 
-	object->setPosition(Vec2(visibleSize.width - offset + origin.x, visibleSize.height / 2 + origin.y));
+	object->setPosition(Vec2(visibleSize.width - offset + origin.x, visibleSize.height - heightOffset + origin.y));
 	MyBodyParser::getInstance()->parseJsonFile("ring_final.json");
 
 	auto objectBody = MyBodyParser::getInstance()->bodyFormJson(object, "body", PhysicsMaterial(1.0, 0.1, 0.1));
@@ -684,7 +800,7 @@ void GameScene::gameOver(int score)
 	if (_score >= lowRankingScore)
 	{
 		// 순위에 드는 경우
-		auto scene = TransitionCrossFade::create(0.5f, TextInput::createScene());
+		auto scene = TransitionCrossFade::create(0.5f, TextInput::createScene(_score));
 		Director::getInstance()->replaceScene(scene);
 	}
 	else
@@ -720,13 +836,14 @@ void GameScene::createObstacle()
 	auto visibleSize = Director::getInstance()->getVisibleSize();
 	Vec2 origin = Director::getInstance()->getVisibleOrigin();
 
-	auto sprite1 = Obstacle::spriteWithFile(1);
-	sprite1->setPosition(getRandomNumber(Director::getInstance()->getVisibleSize().width / 2)+winSize.width / 3, 150);
+	auto sprite1 = Obstacle::spriteWithFile(2);
+	sprite1->setPosition(getRandomNumber(Director::getInstance()->getVisibleSize().width / 4)+winSize.width / 2, 150);
 	sprite1->setTag(obstacleindex);
 	sprite1->attachPhysicsBody(obstacleindex);
 	this->addChild(sprite1);
 	sprite1->addHandFoot();
 	sprite1->attachPhysicsHandFoot(obstacleindex);
+	sprite1->setVelocity();
 	obstacletag[obstaclepos]=obstacleindex;
 	obstacleindex++;
 	obstaclepos++;

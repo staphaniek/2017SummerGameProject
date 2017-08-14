@@ -39,6 +39,7 @@ public:
 	bool insertDB(const string name, const int score);
 	list<Score*> selectDB();
 	bool deleteDB();
+	int checkCount();
 
 //	int insertCharacterDB(*characterInfo);
 //	void deleteCharacterDB(int no);

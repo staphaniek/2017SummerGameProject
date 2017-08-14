@@ -120,7 +120,7 @@ void GameOverScene::onKeyReleased(EventKeyboard::KeyCode key, Event* event)
 
 void GameOverScene::onClickRestart(Ref *object)
 {
-	auto Scene = TransitionCrossFade::create(0.5f, GameScene::createScene()); // fade out
+	auto Scene = TransitionCrossFade::create(0.5f, GameScene::createScene(1,1,0,5)); // fade out
 
 	Director::getInstance()->replaceScene(Scene);
 }

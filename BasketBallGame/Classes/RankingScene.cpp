@@ -12,14 +12,14 @@ Scene* RankingScene::createScene(bool mode, string name, int score)
 	// scene : autorelease object
 	auto scene = Scene::create();
 
+	now = Score();
+	now._name = strdup(name.c_str());
+	now.score = score;
+
 	// layer : autorelease object
 	auto layer = RankingScene::create();
 
 	_mode = mode;
-	
-	now = Score();
-	now._name = strdup(name.c_str());
-	now.score = score;
 
 	// add layer as a child to scene
 	scene->addChild(layer);
@@ -131,7 +131,8 @@ bool RankingScene::init()
 	// rankList 가져오기
 	list<Score*> rankList = DatabaseManager::getInstance()->selectDB();
 	int size = rankList.size();
-
+	// 같은 id와 점수가 2개 이상 있을경우 가장 위의 해당 칸만 애니메이션을 적용시키기 위한 변수
+	float isAppear = false;
 	for (int i = 0; i < size; i++)
 	{
 		auto unit = back->getChildByTag(i);
@@ -142,8 +143,10 @@ bool RankingScene::init()
 		nameLabel->setHorizontalAlignment(TextHAlignment::LEFT);
 		sprintf(tmp, "%d", rankList.front()->score);
 		auto scoreLabel = LabelTTF::create(tmp, "Arial", 40);
-		if (strcmp(now._name, rankList.front()->_name) == 0 && now.score == rankList.front()->score)
+		if (strcmp(now._name, rankList.front()->_name) == 0 && now.score == rankList.front()->score && !isAppear)
 		{
+			isAppear = true;
+			// 자신의 id와 점수가 같은 column에 대해 깜빡거리는 애니메이션을 넣어준다.
 			auto action1 = FadeIn::create(0.5);
 			auto action2 = FadeOut::create(0.5);
 			nameLabel->setFontFillColor(Color3B(255, 0, 0), true);
