@@ -1,7 +1,7 @@
 #include "AppDelegate.h"
 #include "StartScene.h"
 #include"TextInput.h"
-#include "RankingScene.h"
+#include "GameScene.h"
 
 // #define USE_AUDIO_ENGINE 1
 // #define USE_SIMPLE_AUDIO_ENGINE 1
@@ -97,7 +97,7 @@ bool AppDelegate::applicationDidFinishLaunching() {
 
     // create a scene. it's an autorelease object
 //    auto scene = StartScene::createScene();
-	auto scene = RankingScene::createScene(1);
+	auto scene = GameScene::createScene();
 
     // run
     director->runWithScene(scene);

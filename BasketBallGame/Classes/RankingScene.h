@@ -9,7 +9,7 @@ class RankingScene : public Layer
 {
 public:
 
-	static Scene* createScene(bool mode);
+	static Scene* createScene(bool mode,string name,int score);
 
 	virtual bool init();
 

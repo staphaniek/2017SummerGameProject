@@ -5,8 +5,9 @@
 
 // 0 : startScene에서 넘어온 경우, 1 : Game이 끝났을 때 불러진 경우
 bool _mode = false;
+Score now;
 
-Scene* RankingScene::createScene(bool mode)
+Scene* RankingScene::createScene(bool mode, string name, int score)
 {
 	// scene : autorelease object
 	auto scene = Scene::create();
@@ -15,6 +16,10 @@ Scene* RankingScene::createScene(bool mode)
 	auto layer = RankingScene::create();
 
 	_mode = mode;
+	
+	now = Score();
+	now._name = strdup(name.c_str());
+	now.score = score;
 
 	// add layer as a child to scene
 	scene->addChild(layer);
@@ -117,6 +122,12 @@ bool RankingScene::init()
 		rankingNumberbg->addChild(rankingNumber);
 	}
 
+/*	DatabaseManager::getInstance()->createDB();
+	DatabaseManager::getInstance()->insertDB("rnjswlsh", 230);
+	DatabaseManager::getInstance()->insertDB("rnjswlsh1", 240);
+	DatabaseManager::getInstance()->insertDB("rnjswlsh2", 250);
+	DatabaseManager::getInstance()->insertDB("rnjswlsh3", 260);
+*/
 	// rankList 가져오기
 	list<Score*> rankList = DatabaseManager::getInstance()->selectDB();
 	int size = rankList.size();
@@ -129,12 +140,30 @@ bool RankingScene::init()
 		auto nameLabel = LabelTTF::create(tmp, "Arial", 40);
 		nameLabel->setAnchorPoint(Point(0, 0.5));
 		nameLabel->setHorizontalAlignment(TextHAlignment::LEFT);
-		nameLabel->setFontFillColor(Color3B(5, 5, 5), true);
-		nameLabel->setPosition(Point(unit->getContentSize().width * 3 / 9.0, unit->getContentSize().height / 2.0));
-		unit->addChild(nameLabel);
 		sprintf(tmp, "%d", rankList.front()->score);
 		auto scoreLabel = LabelTTF::create(tmp, "Arial", 40);
-		scoreLabel->setFontFillColor(Color3B(5, 5, 5), true);
+		if (strcmp(now._name, rankList.front()->_name) == 0 && now.score == rankList.front()->score)
+		{
+			auto action1 = FadeIn::create(0.5);
+			auto action2 = FadeOut::create(0.5);
+			nameLabel->setFontFillColor(Color3B(255, 0, 0), true);
+			auto seq = Sequence::create(action1, action2, NULL);
+			auto repeat = RepeatForever::create(seq);
+			nameLabel->runAction(repeat);
+			auto action3 = FadeIn::create(0.5);
+			auto action4 = FadeOut::create(0.5);
+			scoreLabel->setFontFillColor(Color3B(255, 0, 0), true);
+			auto seq1 = Sequence::create(action3, action4, NULL);
+			auto repeat1 = RepeatForever::create(seq1);
+			scoreLabel->runAction(repeat1);
+		}
+		else
+		{
+			nameLabel->setFontFillColor(Color3B(5, 5, 5), true);
+			scoreLabel->setFontFillColor(Color3B(5, 5, 5), true);
+		}
+		nameLabel->setPosition(Point(unit->getContentSize().width * 3 / 9.0, unit->getContentSize().height / 2.0));
+		unit->addChild(nameLabel);
 		scoreLabel->setPosition(Point(unit->getContentSize().width * 9 / 10.0, unit->getContentSize().height / 2.0));
 		unit->addChild(scoreLabel);
 		rankList.pop_front();

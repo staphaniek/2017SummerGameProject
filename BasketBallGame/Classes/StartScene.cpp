@@ -134,7 +134,7 @@ void StartScene::onClickStart(Ref* object)
 
 void StartScene::onClickRanking(Ref* object)
 {
-	auto Scene = TransitionCrossFade::create(0.5f, RankingScene::createScene(false)); // fade out
+	auto Scene = TransitionCrossFade::create(0.5f, RankingScene::createScene(false,"",0)); // fade out
 
 	Director::getInstance()->replaceScene(Scene);
 }

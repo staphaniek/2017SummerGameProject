@@ -356,7 +356,7 @@ void TextInput::onClickSubmit(Ref *object)
 	if (DatabaseManager::getInstance()->insertDB(textfield->getString(), _score))
 	{
 		log("submit");
-		auto Scene = TransitionCrossFade::create(0.5f, RankingScene::createScene(true)); // fade out
+		auto Scene = TransitionCrossFade::create(0.5f, RankingScene::createScene(true,textfield->getString(),_score)); // fade out
 		Director::getInstance()->replaceScene(Scene);
 	}
 }

@@ -77,8 +77,8 @@ void DatabaseManager::createDB()
 	std::string query;
 	query = "create table if not exists TB_SCORE(";
 	query += "NO integer primary key autoincrement, ";
-	query += "SCORE integer,";
-	query += "NAME varChar(50))";
+	query += "NAME varChar(50),";
+	query += "SCORE integer)";
 
 	_result = sqlite3_exec(_sqlite, query.c_str(), NULL, NULL, &_errorMSG);
 
@@ -93,7 +93,7 @@ int DatabaseManager::getLowestRankingScore()
 {
 	string query;
 
-	query = "select SCORE from TB_SCORE order by SCORE limit 1";
+	query = "select SCORE from TB_SCORE order by SCORE asc limit 1";
 
 	sqlite3_stmt *stmt = NULL;
 	//stmt에 결과를 담는다.
@@ -139,7 +139,7 @@ bool DatabaseManager::insertDB(const string name, const int score)
 
 list<Score*> DatabaseManager::selectDB()
 {
-	string query = "select * from TB_SCORE limit 10";
+	string query = "select * from TB_SCORE order by SCORE desc limit 10;";
 
 	sqlite3_stmt *stmt = NULL;
 	//stmt에 결과를 담는다.
