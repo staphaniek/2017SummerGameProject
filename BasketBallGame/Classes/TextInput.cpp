@@ -358,6 +358,6 @@ void TextInput::onClickSubmit(Ref *object)
 void TextInput::onClickCancel(Ref *object)
 {
 	log("Cancel");
-	auto Scene = TransitionCrossFade::create(0.5f, GameOverScene::createScene()); // fade out
+	auto Scene = TransitionCrossFade::create(0.5f, GameOverScene::createScene(recent.score)); // fade out
 	Director::getInstance()->replaceScene(Scene);
 }

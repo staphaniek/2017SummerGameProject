@@ -207,7 +207,7 @@ void RankingScene::onClickOK(Ref* object)
 	{
 		CocosDenshion::SimpleAudioEngine::getInstance()->stopBackgroundMusic();
 		CocosDenshion::SimpleAudioEngine::getInstance()->playEffect("sound/button_click.wav");
-		auto Scene = TransitionCrossFade::create(0.5f, GameOverScene::createScene()); // fade out
+		auto Scene = TransitionCrossFade::create(0.5f, GameOverScene::createScene(now.score)); // fade out
 
 		Director::getInstance()->replaceScene(Scene);
 	}

@@ -15,10 +15,12 @@ GameOverScene::~GameOverScene()
 {
 }
 
-Scene* GameOverScene::createScene()
+Scene* GameOverScene::createScene(int score)
 {
 	// scene : autorelease object
 	auto scene = Scene::create();
+
+	_score = score;
 
 	// layer : autorelease object
 	auto layer = GameOverScene::create();
@@ -46,6 +48,12 @@ bool GameOverScene::init()
 	gameover->setScale(scale);
 	gameover->setPosition(Point(visibleSize.width / 2, visibleSize.height / 2));
 	this->addChild(gameover);
+
+	char tmp[50];
+	sprintf(tmp, "Final Score : %d", _score);
+	auto scoreLabel = LabelTTF::create(tmp, "arial", 40);
+	scoreLabel->setPosition(Point(gameover->getContentSize().width / 2, gameover->getContentSize().height * 3 / 5));
+	gameover->addChild(scoreLabel);
 
 	button1 = MenuItemImage::create("RestartButton.png", "RestartButton_on.png", CC_CALLBACK_1(GameOverScene::onClickRestart, this));
 	button1->setTag(0);

@@ -867,7 +867,7 @@ void GameScene::gameOver(int score)
 	}
 	else
 	{
-		auto Scene = TransitionCrossFade::create(0.5f, GameOverScene::createScene()); // fade out
+		auto Scene = TransitionCrossFade::create(0.5f, GameOverScene::createScene(score)); // fade out
 		Director::getInstance()->replaceScene(Scene);
 	}
 }
