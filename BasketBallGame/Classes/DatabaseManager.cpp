@@ -91,10 +91,11 @@ void DatabaseManager::createDB()
 
 int DatabaseManager::getLowestRankingScore()
 {
-	if (checkCount() < 10)return 0;
+	if (checkCount() < 10)
+		return 0;
 	string query;
 
-	query = "select SCORE from TB_SCORE order by SCORE asc limit 1";
+	query = "select SCORE from TB_SCORE order by SCORE desc limit 10";
 
 	sqlite3_stmt *stmt = NULL;
 	//stmt에 결과를 담는다.
@@ -102,12 +103,13 @@ int DatabaseManager::getLowestRankingScore()
 
 	if (_result == SQLITE_OK)
 	{
+		int ret = 0;
 		log("selectDB() SUCCESS");
 		while (sqlite3_step(stmt) == SQLITE_ROW)
 		{
-			int ret = sqlite3_column_int(stmt, 0);
-			return ret;
+			ret = sqlite3_column_int(stmt, 0);
 		}
+		return ret;
 	}
 	else
 		log("ERROR CODE : %d", _result);

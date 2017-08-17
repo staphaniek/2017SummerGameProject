@@ -2,6 +2,7 @@
 #include "DatabaseManager.h"
 #include "StartScene.h"
 #include "GameOverScene.h"
+#include "SimpleAudioEngine.h"
 
 // 0 : startScene에서 넘어온 경우, 1 : Game이 끝났을 때 불러진 경우
 bool _mode = false;
@@ -47,6 +48,9 @@ bool RankingScene::init()
 	Size winSize = Director::getInstance()->getOpenGLView()->getDesignResolutionSize();
 	auto visibleSize = Director::getInstance()->getVisibleSize();
 	Vec2 origin = Director::getInstance()->getVisibleOrigin();
+
+	// set bgm
+	CocosDenshion::SimpleAudioEngine::getInstance()->playBackgroundMusic("sound/rankingSceneSound.mp3", true);
 
 	auto back = Sprite::create("rankingscenebg.png");
 	float scale = winSize.width / back->getContentSize().width;
@@ -201,12 +205,16 @@ void RankingScene::onClickOK(Ref* object)
 {
 	if (_mode)
 	{
+		CocosDenshion::SimpleAudioEngine::getInstance()->stopBackgroundMusic();
+		CocosDenshion::SimpleAudioEngine::getInstance()->playEffect("sound/button_click.wav");
 		auto Scene = TransitionCrossFade::create(0.5f, GameOverScene::createScene()); // fade out
 
 		Director::getInstance()->replaceScene(Scene);
 	}
 	else
 	{
+		CocosDenshion::SimpleAudioEngine::getInstance()->stopBackgroundMusic();
+		CocosDenshion::SimpleAudioEngine::getInstance()->playEffect("sound/button_click.wav");
 		auto Scene = TransitionCrossFade::create(0.5f, StartScene::createScene()); // fade out
 
 		Director::getInstance()->replaceScene(Scene);

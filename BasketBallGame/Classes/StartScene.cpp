@@ -2,6 +2,7 @@
 #include "GameScene.h"
 #include "Obstacle.h"
 #include "RankingScene.h"
+#include "SimpleAudioEngine.h"
 
 USING_NS_CC;
 
@@ -27,6 +28,9 @@ bool StartScene::init()
 	Size winSize = Director::getInstance()->getOpenGLView()->getDesignResolutionSize();
 	auto visibleSize = Director::getInstance()->getVisibleSize();
 	Vec2 origin = Director::getInstance()->getVisibleOrigin();
+
+	// set bgm
+	CocosDenshion::SimpleAudioEngine::getInstance()->playBackgroundMusic("sound/Intro Theme.mp3", true);
 
 	// bg randering
 	auto bg = Sprite::create("startbg.png");
@@ -127,6 +131,8 @@ void StartScene::onKeyReleased(EventKeyboard::KeyCode key, Event* event)
 
 void StartScene::onClickStart(Ref* object)
 {
+	CocosDenshion::SimpleAudioEngine::getInstance()->stopBackgroundMusic();
+	CocosDenshion::SimpleAudioEngine::getInstance()->playEffect("sound/button_click.wav");
 	auto Scene = TransitionCrossFade::create(0.5f, GameScene::createScene(1,1,0,5)); // fade out
 
 	Director::getInstance()->replaceScene(Scene);
@@ -134,6 +140,8 @@ void StartScene::onClickStart(Ref* object)
 
 void StartScene::onClickRanking(Ref* object)
 {
+	CocosDenshion::SimpleAudioEngine::getInstance()->stopBackgroundMusic();
+	CocosDenshion::SimpleAudioEngine::getInstance()->playEffect("sound/button_click.wav");
 	auto Scene = TransitionCrossFade::create(0.5f, RankingScene::createScene(false,"",0)); // fade out
 
 	Director::getInstance()->replaceScene(Scene);

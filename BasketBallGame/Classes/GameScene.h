@@ -45,7 +45,7 @@ public:
 
 	void attachGoal(Ring* ring, int index, const char* mode);
 
-	void createObstacle();
+	void createObstacle(int index);
 
 	void createBG();
 	void createLife();
@@ -55,11 +55,12 @@ public:
 	void updateScore();
 	bool isScoreChanged;
 
+	void createLvStage();
+
 	void update(float fDelta);
 
 	bool keyCheck[128];
 
-	void initSetting();
 	void createStartSignal();
 
 	void gameOver(int score);

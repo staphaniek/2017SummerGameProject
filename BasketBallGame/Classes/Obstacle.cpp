@@ -1,5 +1,6 @@
 #include "Obstacle.h"
 #include "MyBodyParser.h"
+#include "DevConf.h"
 
 
 USING_NS_CC;
@@ -8,16 +9,16 @@ Obstacle::Obstacle()
 {
 	_type = 1;
 	_state = true;
-	upSpeed = Vec2(0, 35);
-	downSpeed = Vec2(0, -35);
+	upSpeed = Vec2(0, 35 + 5 * _level);
+	downSpeed = Vec2(0, -(35 + 5 * _level));
 }
 
 Obstacle::Obstacle(int type)
 {
 	_type = type;
 	_state = true;
-	upSpeed = Vec2(0, 35);
-	downSpeed = Vec2(0, -35);
+	upSpeed = Vec2(0, 35 + 5 * _level);
+	downSpeed = Vec2(0, -(35 + 5 * _level));
 }
 
 Obstacle::~Obstacle()

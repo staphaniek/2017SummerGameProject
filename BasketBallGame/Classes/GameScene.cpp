@@ -45,18 +45,24 @@ bool GameScene::init()
 	auto visibleSize = Director::getInstance()->getVisibleSize();
 	Vec2 origin = Director::getInstance()->getVisibleOrigin();
 
+	if (_life <= 0)gameOver(_score);
+
+	// set bgm
+	CocosDenshion::SimpleAudioEngine::getInstance()->playBackgroundMusic("sound/gameSceneSound.mp3", true);
+
 	createStartSignal();
-
-	initSetting();
-
-	// 배경화면 렌더링
-	createBG();
 
 	// 점수 렌더링
 	createScore();
 
+	// 배경화면 렌더링
+	createBG();
+
 	// life 렌더링
 	createLife();
+
+	// stage / level 렌더링
+	createLvStage();
 
 	// holder 렌더링
 	_isCollideHolder = false;
@@ -109,7 +115,44 @@ bool GameScene::init()
 
 	createBall();
 
-	createObstacle();
+	if (_level > 4)
+	{
+		createObstacle(1);
+	}
+	if (_level > 2)
+	{
+		createObstacle(0);
+	}
+
+	string text = "방향 : ← → \nthrow : 'x' key";
+
+	// 문자열을 담을 변수
+	char utf8Text[255];
+
+#if(CC_TARGET_PLATFORM == CC_PLATFORM_WIN32)
+	// win32 utf-8
+	wchar_t* wChar;
+
+	wChar = new WCHAR[255];
+
+	// wChar에 text를 담는다
+	MultiByteToWideChar(CP_ACP, 0, text.c_str(), strlen(text.c_str()) + 1, wChar, 255);
+
+	// wChar를 인코딩하여 utf8Text에 담는다.
+	WideCharToMultiByte(CP_UTF8, 0, wChar, -1, utf8Text, 1024, NULL, NULL);
+#endif
+
+	// 안드로이드와 아이폰은 파일의 인코딩을 변경하면 한글이 적용됨
+#if(CC_TARGET_PLATFORM != CC_PLATFORM_WIN32)
+	// win32가 아니라면 utf8Text에 들어온 text를 그냥 넣는다
+	sprintf(utf8Text, "%s", text.c_str());
+#endif
+
+	auto instruction = LabelTTF::create(utf8Text, "arial", 30);
+	instruction->setHorizontalAlignment(CCTextAlignment::LEFT);
+	instruction->setAnchorPoint(Point(0, 1));
+	instruction->setPosition(Point(this->getChildByTag(1)->getContentSize().width * 3 + 10, visibleSize.height - 20));
+	this->addChild(instruction);
 
 	// collision detection
 	auto contactListener = EventListenerPhysicsContact::create();
@@ -226,6 +269,7 @@ bool GameScene::onContactBegin(cocos2d::PhysicsContact &contact)
 	{
 		if (!_isCollideHolder && !isFinish)
 		{
+			log("life bonus");
 			_isCollideHolder = true;
 			isFinish = true;
 			updateLife(_holder[0]->_lifeBonus);
@@ -236,6 +280,7 @@ bool GameScene::onContactBegin(cocos2d::PhysicsContact &contact)
 	{
 		if (!_isCollideHolder && !isFinish)
 		{
+			log("life bonus");
 			_isCollideHolder = true;
 			isFinish = true;
 			updateLife(_holder[1]->_lifeBonus);
@@ -277,6 +322,7 @@ bool GameScene::onContactBegin(cocos2d::PhysicsContact &contact)
 		{
 			if (RINGDOWNTAG[i] == tag && _ring[i]->getGoalCheck() && !_ring[i]->_goal)
 			{
+				CocosDenshion::SimpleAudioEngine::getInstance()->pauseBackgroundMusic();
 				char tmp[25];
 				sprintf(tmp, "sound/xylophone-%s.wav", _ring[i]->_melody);
 				CocosDenshion::SimpleAudioEngine::getInstance()->playEffect(tmp);
@@ -297,6 +343,7 @@ bool GameScene::onContactBegin(cocos2d::PhysicsContact &contact)
 		{
 			if (RINGDOWNTAG[i] == tag && _ring[i]->getGoalCheck() && !_ring[i]->_goal)
 			{
+				CocosDenshion::SimpleAudioEngine::getInstance()->pauseBackgroundMusic();
 				char tmp[25];
 				sprintf(tmp, "sound/xylophone-%s.wav", _ring[i]->_melody);
 				CocosDenshion::SimpleAudioEngine::getInstance()->playEffect(tmp);
@@ -456,7 +503,6 @@ void GameScene::update(float fDelta)
 			}
 			isScoreChanged = false;
 		}
-		log("here");
 		this->removeChild(_ball, true);
 		r = true;
 	}
@@ -515,7 +561,7 @@ void GameScene::createBG()
 
 	bg->addChild(edgeNode, -4);
 
-	auto upperBodySize = Size(winSize.width, 50);
+	auto upperBodySize = Size(winSize.width, this->getChildByTag(1)->getContentSize().height);
 	auto upperEdgeBody = PhysicsBody::createEdgeBox(upperBodySize, PHYSICSBODY_MATERIAL_DEFAULT);
 	upperEdgeBody->setCollisionBitmask(BGTAG - 1);
 	upperEdgeBody->setContactTestBitmask(true);
@@ -539,6 +585,7 @@ void GameScene::createBG()
 
 	this->addChild(lowerEdgeNode, -4);
 }
+
 void GameScene::createStartSignal()
 {
 	Size winSize = Director::getInstance()->getOpenGLView()->getDesignResolutionSize();
@@ -559,11 +606,6 @@ void GameScene::createStartSignal()
 	auto action1 = CallFunc::create([=]() {sprite->removeFromParentAndCleanup(true); });
 	auto seq = Sequence::create(action, action1, NULL);
 	sprite->runAction(seq);
-}
-
-// initial setting
-void GameScene::initSetting()
-{
 }
 
 // create life board
@@ -628,6 +670,26 @@ void GameScene::updateScore()
 	char scoreChar[20];
 	sprintf(scoreChar, "%d", _score);
 	_labelScore->setString(scoreChar);
+}
+
+void GameScene::createLvStage()
+{
+	auto visibleSize = Director::getInstance()->getVisibleSize();
+
+	// 레벨 창
+	auto lvStage = Sprite::create("stagelevel.png");
+	lvStage->setAnchorPoint(Vec2(0, 1));
+	lvStage->setPosition(Point(this->getChildByTag(1)->getContentSize().width * 2 - 18, visibleSize.height));
+	this->addChild(lvStage);
+
+	// 레벨 / 스테이지 표시 Label
+	char tmp[10];
+	sprintf(tmp, "%d  /  %d", _level, _stage);
+	auto _labelLvStage = LabelTTF::create(tmp, "arial", 20);
+	_labelLvStage->setColor(Color3B(255, 255, 210));
+	_labelLvStage->setPosition(Point(lvStage->getContentSize().width / 2, 30));
+
+	lvStage->addChild(_labelLvStage);
 }
 
 int getRandomNumber(int x)
@@ -752,7 +814,7 @@ Holder* GameScene::createHolder(int index, int lifeBonus)
 	auto tmp = Sprite::create("basket.png");
 	tmp->setVisible(false);
 	tmp->setPosition(Vec2(holder->getContentSize().width, 0));
-	auto inBody = MyBodyParser::getInstance()->bodyFormJson(tmp, "in", PHYSICSBODY_MATERIAL_DEFAULT);
+	auto inBody = MyBodyParser::getInstance()->bodyFormJson(tmp, "in", PhysicsMaterial(0.5, 0.1, 0.3));
 	inBody->setDynamic(false);
 	inBody->setCollisionBitmask(HOLDERINTAG[index]);
 	inBody->setContactTestBitmask(true);
@@ -825,26 +887,27 @@ void GameScene::TurnEnd()
 		{
 			gameOver(_score);
 		}
+		CocosDenshion::SimpleAudioEngine::getInstance()->resumeBackgroundMusic();
 	});
 	auto sequence = Sequence::create(preCallFunc, action, callFunc, NULL);
 	_ball->runAction(sequence);
 }
 
-void GameScene::createObstacle()
+void GameScene::createObstacle(int index)
 {
 	Size winSize = Director::getInstance()->getOpenGLView()->getDesignResolutionSize();
 	auto visibleSize = Director::getInstance()->getVisibleSize();
 	Vec2 origin = Director::getInstance()->getVisibleOrigin();
-
-	auto sprite1 = Obstacle::spriteWithFile(2);
-	sprite1->setPosition(getRandomNumber(Director::getInstance()->getVisibleSize().width / 4)+winSize.width / 2, 150);
+	
+	auto sprite1 = Obstacle::spriteWithFile(getRandomNumber(2));
+	sprite1->setPosition(getRandomNumber(visibleSize.width / 6) + visibleSize.width / 6 * (1-index) + winSize.width / 2, 100 + getRandomNumber((int)(winSize.height / 2)));;
 	sprite1->setTag(obstacleindex);
 	sprite1->attachPhysicsBody(obstacleindex);
 	this->addChild(sprite1);
 	sprite1->addHandFoot();
 	sprite1->attachPhysicsHandFoot(obstacleindex);
 	sprite1->setVelocity();
-	obstacletag[obstaclepos]=obstacleindex;
+	obstacletag[obstaclepos] = obstacleindex;
 	obstacleindex++;
 	obstaclepos++;
 }

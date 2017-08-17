@@ -260,8 +260,8 @@ void TextInput::onKeyPressed(cocos2d::EventKeyboard::KeyCode key, cocos2d::Event
 		else tmp = "0";
 		break;
 	case EventKeyboard::KeyCode::KEY_1:
-		if (isupper)tmp = "J";
-		else tmp = "j";
+		if (isupper)tmp = "!";
+		else tmp = "1";
 		break;
 	case EventKeyboard::KeyCode::KEY_2:
 		if (isupper)tmp = "@";
@@ -325,7 +325,7 @@ void TextInput::onKeyPressed(cocos2d::EventKeyboard::KeyCode key, cocos2d::Event
 	}
 	CCTextFieldTTF* textfield = (CCTextFieldTTF *)this->getChildByTag(0)->getChildByTag(1);
 	std::string origin = textfield->getString();
-	textfield->setString(origin + tmp);
+	if(origin.length() < 15)textfield->setString(origin + tmp);
 }
 void TextInput::onKeyReleased(cocos2d::EventKeyboard::KeyCode key, cocos2d::Event* event)
 {
@@ -346,9 +346,12 @@ void TextInput::onClickSubmit(Ref *object)
 	CCTextFieldTTF* textfield = (CCTextFieldTTF *)this->getChildByTag(0)->getChildByTag(1);
 	if (DatabaseManager::getInstance()->insertDB(textfield->getString(), recent.score))
 	{
-		log("submit");
-		auto Scene = TransitionCrossFade::create(0.5f, RankingScene::createScene(true,textfield->getString(),recent.score)); // fade out
-		Director::getInstance()->replaceScene(Scene);
+		if (DatabaseManager::getInstance()->deleteDB())
+		{
+			log("submit");
+			auto Scene = TransitionCrossFade::create(0.5f, RankingScene::createScene(true, textfield->getString(), recent.score)); // fade out
+			Director::getInstance()->replaceScene(Scene);
+		}
 	}
 }
 
